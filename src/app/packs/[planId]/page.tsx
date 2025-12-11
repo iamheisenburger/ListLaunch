@@ -3,11 +3,13 @@
 import { useAction, useQuery } from "convex/react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "../../../../convex/_generated/api";
+import type { Id } from "../../../../convex/_generated/dataModel";
 
 export default function PackPage() {
   const params = useParams();
   const router = useRouter();
-  const planId = params?.planId as string | undefined;
+  const planIdParam = params?.planId as string | undefined;
+  const planId = planIdParam as Id<"directory_plans"> | undefined;
 
   const pack = useQuery(
     api.submissions.getByPlan,
