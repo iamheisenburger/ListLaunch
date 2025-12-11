@@ -60,7 +60,32 @@ export const updateStatus = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, { planId, status, notes }) => {
-    await ctx.db.patch(planId, { status, notes, updatedAt: now() });
+    const patch: Record<string, unknown> = {
+      status,
+      notes,
+      statusUpdatedAt: now(),
+      updatedAt: now(),
+    };
+    if (status === "submitted") {
+      patch.submittedAt = now();
+    }
+    if (status === "live") {
+      patch.liveAt = now();
+    }
+    await ctx.db.patch(planId, patch);
+  },
+});
+
+export const updateNotes = mutation({
+  args: {
+    planId: v.id("directory_plans"),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, { planId, notes }) => {
+    await ctx.db.patch(planId, {
+      notes,
+      updatedAt: now(),
+    });
   },
 });
 

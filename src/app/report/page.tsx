@@ -21,6 +21,9 @@ export default function ReportPage() {
       "Priority",
       "Status",
       "Notes",
+      "Submitted at",
+      "Live at",
+      "Last update",
     ];
     const rows = plans.map((p) => [
       p.directory?.name ?? "",
@@ -30,6 +33,9 @@ export default function ReportPage() {
       p.priority ?? "",
       p.status ?? "",
       p.notes ?? "",
+      p.submittedAt ? new Date(p.submittedAt).toISOString() : "",
+      p.liveAt ? new Date(p.liveAt).toISOString() : "",
+      p.statusUpdatedAt ? new Date(p.statusUpdatedAt).toISOString() : "",
     ]);
     const csv =
       [headers, ...rows]
@@ -61,17 +67,20 @@ export default function ReportPage() {
         </button>
       </div>
       <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
-        <div className="grid grid-cols-6 bg-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-300">
+        <div className="grid grid-cols-9 bg-white/5 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-300">
           <span>Directory</span>
           <span>DR</span>
           <span>Traffic</span>
           <span>Priority</span>
           <span>Status</span>
+          <span>Submitted</span>
+          <span>Live</span>
+          <span>Last update</span>
           <span>Notes</span>
         </div>
         <div className="divide-y divide-white/5">
           {(plans ?? []).map((p) => (
-            <div key={p._id} className="grid grid-cols-6 items-center px-4 py-3 text-sm">
+            <div key={p._id} className="grid grid-cols-9 items-center px-4 py-3 text-sm">
               <div className="truncate text-white">{p.directory?.name}</div>
               <div className="text-slate-200">{p.directory?.dr ?? "—"}</div>
               <div className="text-slate-200">
@@ -81,6 +90,17 @@ export default function ReportPage() {
               </div>
               <div className="text-slate-200">{p.priority ?? "—"}</div>
               <div className="text-slate-200">{p.status ?? "planned"}</div>
+              <div className="text-slate-200">
+                {p.submittedAt ? new Date(p.submittedAt).toLocaleDateString() : "—"}
+              </div>
+              <div className="text-slate-200">
+                {p.liveAt ? new Date(p.liveAt).toLocaleDateString() : "—"}
+              </div>
+              <div className="text-slate-200">
+                {p.statusUpdatedAt
+                  ? new Date(p.statusUpdatedAt).toLocaleDateString()
+                  : "—"}
+              </div>
               <div className="truncate text-slate-300">{p.notes ?? "—"}</div>
             </div>
           ))}
@@ -94,4 +114,5 @@ export default function ReportPage() {
     </div>
   );
 }
+
 

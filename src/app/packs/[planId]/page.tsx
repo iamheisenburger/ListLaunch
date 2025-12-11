@@ -43,6 +43,9 @@ export default function PackPage() {
   const fields = [
     { label: "Title", value: pack?.title },
     { label: "Tagline", value: pack?.tagline },
+    { label: "Alt titles", value: (pack?.altTitles ?? []).join("\n") },
+    { label: "Alt taglines", value: (pack?.altTaglines ?? []).join("\n") },
+    { label: "Short blurb", value: pack?.shortBlurb },
     { label: "Short description", value: pack?.shortDescription },
     { label: "Long description", value: pack?.longDescription },
     { label: "Categories", value: (pack?.categories ?? []).join(", ") },

@@ -1,4 +1,8 @@
-import { action, mutation, query } from "./_generated/server";
+import {
+  action as convexAction,
+  mutation as convexMutation,
+  query as convexQuery,
+} from "./_generated/server";
 import { v } from "convex/values";
 import OpenAI from "openai";
 import { z } from "zod";
@@ -10,8 +14,11 @@ const defaultModel = "gpt-5-mini-2025-08-07";
 const PackSchema = z.object({
   title: z.string(),
   tagline: z.string().optional(),
+  altTitles: z.array(z.string()).optional(),
+  altTaglines: z.array(z.string()).optional(),
   shortDescription: z.string().optional(),
   longDescription: z.string().optional(),
+  shortBlurb: z.string().optional(),
   categories: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
   utmUrl: z.string().optional(),
@@ -38,7 +45,7 @@ type PackRecord = {
   planId: Id<"directory_plans">;
 } & z.infer<typeof PackSchema>;
 
-export const getByPlan = query({
+export const getByPlan = convexQuery({
   args: { planId: v.id("directory_plans") },
   handler: async (ctx, { planId }) => {
     return await ctx.db
@@ -48,7 +55,7 @@ export const getByPlan = query({
   },
 });
 
-export const planDetails = query({
+export const planDetails = convexQuery({
   args: { planId: v.id("directory_plans") },
   handler: async (ctx, { planId }) => {
     const plan = await ctx.db.get(planId);
@@ -61,13 +68,16 @@ export const planDetails = query({
   },
 });
 
-export const savePack = mutation({
+export const savePack = convexMutation({
   args: {
     planId: v.id("directory_plans"),
     title: v.string(),
     tagline: v.optional(v.string()),
+    altTitles: v.optional(v.array(v.string())),
+    altTaglines: v.optional(v.array(v.string())),
     shortDescription: v.optional(v.string()),
     longDescription: v.optional(v.string()),
+    shortBlurb: v.optional(v.string()),
     categories: v.optional(v.array(v.string())),
     tags: v.optional(v.array(v.string())),
     utmUrl: v.optional(v.string()),
@@ -96,7 +106,7 @@ export const savePack = mutation({
   },
 });
 
-export const generatePack = action({
+export const generatePack = convexAction({
   args: { planId: v.id("directory_plans") },
   handler: async (
     ctx,
@@ -109,8 +119,11 @@ export const generatePack = action({
         planId,
         title: existing.title,
         tagline: existing.tagline ?? undefined,
+        altTitles: existing.altTitles ?? undefined,
+        altTaglines: existing.altTaglines ?? undefined,
         shortDescription: existing.shortDescription ?? undefined,
         longDescription: existing.longDescription ?? undefined,
+        shortBlurb: existing.shortBlurb ?? undefined,
         categories: existing.categories ?? undefined,
         tags: existing.tags ?? undefined,
         utmUrl: existing.utmUrl ?? undefined,
@@ -146,10 +159,11 @@ export const generatePack = action({
 Goal: ${plan.goal ?? "DR"}
 Directory: ${directory.name} (${directory.url})
 Niche tags: ${(directory.niches ?? []).join(", ")}
-Requested fields: title, tagline, shortDescription, longDescription, categories, tags, utmUrl, cta, extraFields (key/value).
+Requested fields (JSON): title, tagline, altTitles (3 variants), altTaglines (3 variants), shortBlurb (<=140 chars), shortDescription (<=280 chars), longDescription (~600 chars max), categories, tags, utmUrl, cta, extraFields (key/value).
 Use a UTM URL if possible (utm_source=${directory.name
             .toLowerCase()
-            .replace(/\\s+/g, "-")}).`,
+            .replace(/\s+/g, "-")}).
+Style: concise, benefit-led, directory-specific; avoid hype. Return JSON only.`,
         },
       ],
     });
@@ -167,4 +181,5 @@ Use a UTM URL if possible (utm_source=${directory.name
     return { _id: id as Id<"submission_packs">, planId, ...pack };
   },
 });
+
 
